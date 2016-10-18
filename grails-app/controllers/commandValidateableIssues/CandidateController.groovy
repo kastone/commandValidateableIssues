@@ -13,56 +13,64 @@ class CandidateController extends RestfulController{
         super(Candidate)
     }
 
-    def updateValidatableWorks(ValidateableCommand command){
-        assert command.iAmString
+    def commandTypeMismatchErrorCorrectlyAppliedWhenGrailsAppliesTrait(ValidateableByTraitCommand command){
+        assert command.iAmString//added this in Grails 3.2.0 upgrade to demonstrate that when run from unit test, command properties not binding correctly from json
+
         if(command.hasErrors()){
             respond command.errors
             return
-        }
-        Candidate candidateToUpdate = Candidate.get(params.id)
-        candidateToUpdate = command.prepareCandidateForUpdate(candidateToUpdate)
-        if(!candidateToUpdate.save()) {
-            respond candidateToUpdate.errors
-            return
         }else{
-            respond candidateToUpdate
-            return
+            render 'no errors'
         }
     }
 
-    def updateValidatableDoesNotWork(ImplementsValidateableCommand command){
-        assert command.iAmString
+    def commandTypeMismatchErrorCorrectlyAppliedWhenTraitManuallyImplemented(ImplementsValidateableCommand command){
+        assert command.iAmString//added this in Grails 3.2.0 upgrade to demonstrate that when run from unit test, command properties not binding correctly from json
         if(command.hasErrors()){
             respond command.errors
             return
+        }else{
+            render 'no errors'
         }
-        Candidate candidateToUpdate = Candidate.get(params.id)
-        candidateToUpdate = command.prepareCandidateForUpdate(candidateToUpdate)
-        if(!candidateToUpdate.save()) {
-            respond candidateToUpdate.errors
+    }
+
+    def validateableCommandDefaultNullableWorks(ImplementsValidateableCommand command){
+        if(command.hasErrors()){
+            respond command.errors
             return
         }else{
-            respond candidateToUpdate
+            render "no errors"
+        }
+    }
+
+    def validateableCommandDefaultNullableDoesNotWork(ValidateableByTraitDefaultNullableCommand command){
+        if(command.hasErrors()){
+            respond command.errors
             return
+        }else{
+            render "no errors"
         }
     }
 
 }
 
-class ValidateableCommand{
+class ValidateableByTraitCommand {
     String iAmString
     Long iAmLong
-
-    //can't use nullableDefault b/c of Validateable bug.
 
     static constraints = {
         iAmString(nullable:true)
         iAmLong(nullable:true)
     }
+}
 
-    Candidate prepareCandidateForUpdate(Candidate candidate){
-        candidate.name = iAmString
-        candidate.votes = iAmLong
+class ValidateableByTraitDefaultNullableCommand {
+    String iAmString
+    Long iAmLong
+
+    //DOES NOT WORK IN UNIT TESTS
+    static boolean defaultNullable() {
+        true
     }
 }
 
@@ -70,12 +78,11 @@ class ImplementsValidateableCommand implements Validateable{
     String iAmString
     Long iAmLong
 
+    static constraints = {
+        iAmString(maxSize:100)
+    }
+//WORKS IN UNIT TESTS
     static boolean defaultNullable() {
         true
-    }
-
-    Candidate prepareCandidateForUpdate(Candidate candidate){
-        candidate.name = iAmString
-        candidate.votes = iAmLong
     }
 }
