@@ -14,6 +14,7 @@ class CandidateController extends RestfulController{
     }
 
     def updateValidatableWorks(ValidateableCommand command){
+        assert command.iAmString
         if(command.hasErrors()){
             respond command.errors
             return
@@ -30,6 +31,7 @@ class CandidateController extends RestfulController{
     }
 
     def updateValidatableDoesNotWork(ImplementsValidateableCommand command){
+        assert command.iAmString
         if(command.hasErrors()){
             respond command.errors
             return

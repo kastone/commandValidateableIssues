@@ -11,6 +11,7 @@ class UrlMappings {
 
         //        REST ENDPOINTS
         "/candidates"(resources:'candidate')
+        "/api/candidates/1"(controller: 'candidate', action: 'updateValidatableDoesNotWork', method: 'PUT')
 
         "/"(view:"/index")
         "500"(view:'/error')
